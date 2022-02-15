@@ -96,10 +96,9 @@ class NaiveWord2VecNGS:
         c_pos = self.W_dense[:, c_pos_idx] 
         sigmoid_pos  = self._sigmoid(np.dot(h, c_pos))  
         grad_V_output_pos = (sigmoid_pos - 1) * h.T
+        grad_V_input = np.sum((sigmoid_pos-1) * c_pos, axis=1)
 
         self.W_dense[:, c_pos_idx] = c_pos - self.learning_rate * grad_V_output_pos
-
-        grad_V_input = np.sum((sigmoid_pos-1) * c_pos, axis=1)
         
         if self.compute_loss:
             loss_pos = np.sum(np.negative(np.log(sigmoid_pos)))
@@ -110,11 +109,10 @@ class NaiveWord2VecNGS:
         
         c_neg = self.W_dense[:, W_neg]           
         sigmoid_neg = self._sigmoid(np.dot(h, c_neg))  
-        grad_V_output_neg = sigmoid_neg * h.T  
+        grad_V_output_neg = sigmoid_neg * h.T
+        grad_V_input += np.sum(sigmoid_neg * c_neg, axis=1)  
         
         self.W_dense[:, W_neg] = c_neg - self.learning_rate * grad_V_output_neg
-
-        grad_V_input += np.sum(sigmoid_neg * c_neg, axis=1)
 
         if self.compute_loss:
             loss_neg = np.sum(np.negative(np.log(self._sigmoid(np.dot(h, np.negative(c_neg))))))
